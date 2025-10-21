@@ -93,7 +93,7 @@ See [infrar-engine README](https://github.com/QodeSrl/infrar-engine#-quick-start
 
 - [infrar-engine](https://github.com/QodeSrl/infrar-engine) - ✅ Transformation engine (includes basic CLI)
 - [infrar-plugins](https://github.com/QodeSrl/infrar-plugins) - ✅ Transformation rules
-- [infrar-sdk-python](https://github.com/QodeSrl/infrar-sdk-python) - 🚧 Python SDK (coming soon)
+- [infrar-sdk-python](https://github.com/QodeSrl/infrar-sdk-python) - ✅ Python SDK (v0.1.0)
 - [infrar-docs](https://github.com/QodeSrl/infrar-docs) - ✅ Documentation
 
 ## 📅 Timeline
