@@ -1,107 +1,153 @@
 # Infrar CLI
 
-**Command-line interface for Infrar - Initialize, transform, and deploy multi-cloud applications**
+**Command-line interface for Infrar - Transform and manage multi-cloud applications**
 
-## 📌 Status: Basic CLI in Engine Repo
+## Status: ✅ Active Development
 
-Currently, a basic transformation CLI tool exists in [infrar-engine](https://github.com/QodeSrl/infrar-engine) at `cmd/transform/`.
+The Infrar CLI is now the primary command-line tool for working with Infrar transformations.
 
-**Working Now**:
-```bash
-# Clone infrar-engine
-git clone git@github.com:QodeSrl/infrar-engine.git
-cd infrar-engine
+## Installation
 
-# Build the transform tool
-go build -o bin/transform ./cmd/transform
-
-# Transform code
-./bin/transform -provider aws -input app.py -output app_aws.py
-```
-
-## 🎯 Planned Full CLI (This Repo)
-
-This repository will house a comprehensive CLI with additional commands:
+### Build from Source
 
 ```bash
-# Initialize new project
-infrar init my-app --language python
-
-# Transform code
-infrar transform --provider aws --input app.py
-
-# Deploy application (future)
-infrar deploy --provider aws --region us-east-1
-
-# Compare costs (future)
-infrar cost compare
-
-# Manage configuration
-infrar config set aws.credentials ~/.aws/credentials
+git clone https://github.com/QodeSrl/infrar-cli.git
+cd infrar-cli
+go build -o bin/infrar .
 ```
 
-## 🗂️ Planned Structure
+### Add to PATH (Optional)
+
+```bash
+# Copy to /usr/local/bin
+sudo cp bin/infrar /usr/local/bin/
+
+# Or add to your PATH
+export PATH="$PATH:/path/to/infrar-cli/bin"
+```
+
+## Quick Start
+
+### Transform Code
+
+```bash
+# Transform from file to AWS
+infrar transform --provider aws --input app.py --output app_aws.py
+
+# Transform to GCP
+infrar transform --provider gcp --input app.py --output app_gcp.py
+
+# Transform from stdin
+cat app.py | infrar transform --provider aws
+
+# Use custom plugin directory
+infrar transform --provider aws --plugins ./my-plugins --input app.py
+```
+
+### Get Help
+
+```bash
+# General help
+infrar --help
+
+# Transform command help
+infrar transform --help
+
+# Version
+infrar --version
+```
+
+## Commands
+
+### `infrar transform`
+
+Transform Infrar SDK code to provider-specific code.
+
+**Flags**:
+- `--provider, -p` - Target cloud provider (aws, gcp, azure) [default: aws]
+- `--plugins` - Path to plugins directory [default: ../infrar-plugins/packages]
+- `--capability, -c` - Capability to transform (storage, database, etc.) [default: storage]
+- `--input, -i` - Input file to transform (or use stdin)
+- `--output, -o` - Output file (or use stdout)
+
+**Examples**:
+
+```bash
+# Basic transformation
+infrar transform --provider aws --input app.py --output app_aws.py
+
+# Pipe from stdin
+echo "from infrar.storage import upload
+upload(bucket='test', source='file.txt', destination='file.txt')" | infrar transform --provider aws
+
+# Specify plugins location
+infrar transform --provider gcp --plugins /path/to/plugins --input app.py
+```
+
+## Architecture
+
+The Infrar CLI uses [infrar-engine](https://github.com/QodeSrl/infrar-engine) as a library for the transformation logic.
 
 ```
 infrar-cli/
 ├── cmd/
-│   ├── init.go         # Project initialization
-│   ├── transform.go    # Code transformation
-│   ├── deploy.go       # Deployment orchestration
-│   ├── cost.go         # Cost comparison
-│   └── config.go       # Configuration management
-├── pkg/
-│   ├── project/        # Project scaffolding
-│   ├── provider/       # Cloud provider integrations
-│   └── deployer/       # Deployment logic
-├── go.mod
-└── main.go
+│   ├── root.go          # Root command setup (Cobra)
+│   └── transform.go     # Transform command implementation
+├── main.go              # CLI entry point
+├── go.mod               # Dependencies (including infrar-engine)
+└── bin/
+    └── infrar           # Built binary
 ```
 
-## 🔧 Why Separate CLI?
+## Development
 
-**Decision Pending**: We're evaluating whether to:
+### Dependencies
 
-**Option A**: Keep basic CLI in `infrar-engine` (current approach)
-- Simpler architecture
-- CLI is thin wrapper around engine
-- Easier to maintain
+- Go 1.21 or later
+- infrar-engine (included as Go module dependency)
+- Cobra CLI framework
 
-**Option B**: Build comprehensive CLI here (planned approach)
-- More features (init, deploy, config)
-- Standalone distribution
-- Better user experience
-
-## 🚀 What's Available Today
-
-Use the CLI in infrar-engine:
+### Build
 
 ```bash
-# Transform stdin
-echo "from infrar.storage import upload" | ./bin/transform -provider aws
+# Build CLI
+go build -o bin/infrar .
 
-# Transform file
-./bin/transform -provider aws -plugins ../infrar-plugins/packages -input app.py
+# Run tests
+go test ./...
 
-# Transform to GCP
-./bin/transform -provider gcp -input app.py -output app_gcp.py
+# Install dependencies
+go mod tidy
 ```
 
-See [infrar-engine README](https://github.com/QodeSrl/infrar-engine#-quick-start) for full CLI documentation.
+### Local Development with Engine
 
-## 🔗 Related Repositories
+The CLI uses a local replace directive to use the local infrar-engine:
 
-- [infrar-engine](https://github.com/QodeSrl/infrar-engine) - ✅ Transformation engine (includes basic CLI)
-- [infrar-plugins](https://github.com/QodeSrl/infrar-plugins) - ✅ Transformation rules
-- [infrar-sdk-python](https://github.com/QodeSrl/infrar-sdk-python) - ✅ Python SDK (v0.1.0)
-- [infrar-docs](https://github.com/QodeSrl/infrar-docs) - ✅ Documentation
+```go
+// go.mod
+replace github.com/QodeSrl/infrar-engine => ../infrar-engine
+```
 
-## 📅 Timeline
+This allows development of both CLI and engine simultaneously without publishing.
 
-Decision on CLI architecture: Within 1 week
-Implementation (if separate): Phase 1B (after SDK complete)
+## Related Repositories
 
-## 📄 License
+- [infrar-engine](https://github.com/QodeSrl/infrar-engine) - Transformation engine library
+- [infrar-sdk-python](https://github.com/QodeSrl/infrar-sdk-python) - Python SDK (v0.1.0)
+- [infrar-plugins](https://github.com/QodeSrl/infrar-plugins) - Transformation rules
+- [infrar-docs](https://github.com/QodeSrl/infrar-docs) - Documentation
+
+## Future Commands
+
+Planned commands for future releases:
+
+- `infrar init` - Initialize new project
+- `infrar deploy` - Deploy application
+- `infrar cost` - Cost comparison
+- `infrar config` - Configuration management
+
+## License
 
 Apache License 2.0
 
